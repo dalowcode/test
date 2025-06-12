@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebView aplikace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+        }
+
+        /* Záhlaví a zápatí */
+        header, footer {
+            width: 100%;
+            height: 70px;
+            background: #c4de00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Logo */
+        .logo {
+            height: 80px;
+        }
+
+        /* Upozornění pod záhlavím */
+        .alert-message {
+            width: 90%;
+            background: #004033;
+            color: #ffffff;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px;
+            margin: 20px auto;
+            border-radius: 15px;
+        }
+
+        /* Styl pro tlačítko "Podepsat" */
+        #signButton {
+            padding: 10px 20px;
+            font-size: 18px;
+            background: #004033;
+            color: #ffffff;
+            border: none;
+            cursor: not-allowed;
+            opacity: 0.5;
+            border-radius: 10px;
+        }
+
+        .iframe-container {
+            width: 100%;
+            height: calc(100vh - 100px);
+            overflow: auto;
+            position: relative;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 200vh;
+            border: none;
+            pointer-events: auto; /* ✅ Odemčeno na začátku */
+        }
+
+        /* Overlay pro blokování klikání na iframe */
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent; /* Žádné vizuální překrytí */
+            z-index: 9999;
+            pointer-events: all; /* Skutečně blokuje klikání */
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="https://www.direct-auto.cz/cdn/shop/files/direct-auto_logo_pozitivni-provedeni_rgb_hd.png?v=1745316236" 
+             alt="Direct Auto Logo" class="logo">
+    </header>
+
+    <div id="alertMessage" class="alert-message">
+        Nezapomeňte projít všechny dokumenty, než podepíšete!
+    </div>
+
+    <div class="iframe-container" id="iframeContainer">
+        <div id="overlay"></div> <!-- Překrytí nad iframe -->
+        <iframe id="webview"></iframe>
+    </div>
+
+    <footer>
+        <button id="signButton" disabled>Podepsat</button>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const iframeContainer = document.getElementById("iframeContainer");
+            const iframe = document.getElementById("webview");
+            const overlay = document.getElementById("overlay");
+            const signButton = document.getElementById("signButton");
+            const alertMessage = document.getElementById("alertMessage");
+            let isLocked = false;
+
+            // ✅ Povolit interakce na začátku
+            iframe.style.pointerEvents = "auto";
+
+            // Načtení parametru bioid z adresy a sestavení finální URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const bioidValue = urlParams.get("bioid");
+
+            iframe.src = bioidValue 
+                ? `https://sandbox.signosoft.com/?bioid=${encodeURIComponent(bioidValue)}&server=https://sandbox.signosoft.com/api` 
+                : "https://sandbox.signosoft.com/?bioid=default_value&server=https://sandbox.signosoft.com/api";
+
+            console.log("✅ Iframe zdroj nastaven na:", iframe.src);
+
+            // ⛔ Zamknutí při příchodu `browsableLoaded`
+            window.addEventListener("message", (event) => {
+                if (event.data && event.data.event === "browsableLoaded" && !isLocked) {
+                    console.log("🔐 Dokument načten! Aktivuji overlay.");
+                    overlay.style.display = "block"; // Aktivní blokace
+                    isLocked = true;
+                }
+            });
+
+            // ✅ Odemknutí po doscrollování dolů
+            iframeContainer.addEventListener("scroll", () => {
+                const scrollPosition = iframeContainer.scrollTop + iframeContainer.clientHeight;
+                const scrollHeight = iframeContainer.scrollHeight;
+
+                if (scrollPosition >= scrollHeight - 10) {
+                    console.log("✅ Uživatel doscrolloval dolů, odemykám iframe.");
+                    overlay.style.display = "none"; // Zrušení blokace
+                    signButton.disabled = false;
+                    signButton.style.background = "#004033";
+                    signButton.style.color = "#ffffff";
+                    signButton.style.cursor = "pointer";
+                    signButton.style.opacity = "1";
+                    alertMessage.style.display = "none";
+                }
+            });
+        });
+    </script>
+</body>
+</html>
