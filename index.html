@@ -167,15 +167,21 @@
                     signButton.style.cursor = "pointer";
                     signButton.style.opacity = "1";
                     alertMessage.style.display = "none";
+
+                    // ✅ Odemknutí interakce s `iframe`
+                    iframe.style.pointerEvents = "auto"; 
                 }
             });
 
-            // ✅ Spuštění podpisové relace po kliknutí na tlačítko
+            // ✅ Spuštění podpisové relace po kliknutí na tlačítko + zarovnání viditelnosti
             signButton.addEventListener("click", () => {
                 console.log("🔏 Spouštím podpisovou relaci!");
                 
-                // Odemknutí interakce s `iframe`
-                iframe.style.pointerEvents = "auto"; 
+                // ⏫ Posunutí iframe do viditelné oblasti před podpisem
+                window.scrollTo({
+                    top: iframe.offsetTop - 50,
+                    behavior: "smooth"
+                });
 
                 iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
             });
@@ -183,5 +189,3 @@
     </script>
 </body>
 </html>
-
-
