@@ -174,12 +174,16 @@
 signButton.addEventListener("click", () => {
     console.log("🔏 Spouštím podpisovou relaci!");
 
-    // Posun iframe do viditelné oblasti
-    iframe.scrollIntoView({ behavior: "smooth", block: "center" });
+    // ⏫ Posunutí `iframe` nahoru o přesnou hodnotu
+    window.scrollTo({
+        top: iframe.offsetTop - 50, // Uprav hodnotu podle potřeby
+        behavior: "smooth"
+    });
 
-    // Odeslání zprávy do iframe
+    // Spuštění podpisu
     iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
 });
+
         });
     </script>
 </body>
