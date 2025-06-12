@@ -171,21 +171,17 @@
             });
 
             // ✅ Spuštění podpisové relace po kliknutí na tlačítko
-signButton.addEventListener("click", () => {
-    console.log("🔏 Spouštím podpisovou relaci!");
+            signButton.addEventListener("click", () => {
+                console.log("🔏 Spouštím podpisovou relaci!");
+                
+                // Odemknutí interakce s `iframe`
+                iframe.style.pointerEvents = "auto"; 
 
-    // ⏫ Posunutí `iframe` nahoru o přesnou hodnotu
-    window.scrollTo({
-        top: iframe.offsetTop - 50, // Uprav hodnotu podle potřeby
-        behavior: "smooth"
-    });
-
-    // Spuštění podpisu
-    iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
-});
-
+                iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
+            });
         });
     </script>
 </body>
 </html>
+
 
