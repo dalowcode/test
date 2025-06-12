@@ -156,11 +156,11 @@
 
             // ✅ Odemknutí tlačítka po doscrollování dolů
             iframeContainer.addEventListener("scroll", () => {
-                const scrollPosition = iframeContainer.scrollTop + iframeContainer.clientHeight;
-                const scrollHeight = iframeContainer.scrollHeight;
+                const scrollPosition = Math.ceil(iframeContainer.scrollTop + iframeContainer.clientHeight);
+                const scrollHeight = Math.ceil(iframeContainer.scrollHeight);
 
-                if (scrollPosition >= scrollHeight - 10) {
-                    console.log("✅ Uživatel doscrolloval dolů, odemykám tlačítko Podepsat.");
+                if (scrollPosition >= scrollHeight - 2) {
+                    console.log("✅ Uživatel doscrolloval úplně dolů, odemykám tlačítko Podepsat.");
                     signButton.disabled = false;
                     signButton.style.background = "#004033";
                     signButton.style.color = "#ffffff";
@@ -189,4 +189,5 @@
     </script>
 </body>
 </html>
+
 
