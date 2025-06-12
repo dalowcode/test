@@ -171,10 +171,15 @@
             });
 
             // ✅ Spuštění podpisové relace po kliknutí na tlačítko
-            signButton.addEventListener("click", () => {
-                console.log("🔏 Spouštím podpisovou relaci!");
-                iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
-            });
+signButton.addEventListener("click", () => {
+    console.log("🔏 Spouštím podpisovou relaci!");
+
+    // Posun iframe do viditelné oblasti
+    iframe.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    // Odeslání zprávy do iframe
+    iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
+});
         });
     </script>
 </body>
