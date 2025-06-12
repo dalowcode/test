@@ -146,38 +146,33 @@
             console.log("✅ Iframe zdroj nastaven na:", iframe.src);
 
             // ⛔ Zamknutí dokumentu po načtení
-            window.addEventListener("message", (event) => {
-                if (event.data && event.data.event === "browsableLoaded" && isLocked) {
-                    console.log("🔐 Dokument načten! Zamykám interakci.");
-                    iframe.style.pointerEvents = "none";
-                    isLocked = true;
-                }
-            });
+            iframe.addEventListener("load", () => {
+                console.log("✅ Dokument v `iframe` byl plně načten!");
 
-            // ✅ Odemknutí tlačítka po doscrollování dolů
-            iframeContainer.addEventListener("scroll", () => {
-                const scrollPosition = Math.ceil(iframeContainer.scrollTop + iframeContainer.clientHeight);
-                const scrollHeight = Math.ceil(iframeContainer.scrollHeight);
+                iframeContainer.addEventListener("scroll", () => {
+                    const scrollPosition = Math.ceil(iframeContainer.scrollTop + iframeContainer.clientHeight);
+                    const iframeContentHeight = iframe.contentWindow.document.documentElement.scrollHeight; // Skutečná výška obsahu
 
-                if (scrollPosition >= scrollHeight - 2) {
-                    console.log("✅ Uživatel doscrolloval úplně dolů, odemykám tlačítko Podepsat.");
-                    signButton.disabled = false;
-                    signButton.style.background = "#004033";
-                    signButton.style.color = "#ffffff";
-                    signButton.style.cursor = "pointer";
-                    signButton.style.opacity = "1";
-                    alertMessage.style.display = "none";
+                    if (scrollPosition >= iframeContentHeight - 2) { // ✅ Ověření konce skutečné stránky
+                        console.log("✅ Uživatel doscrolloval na konec dokumentu, odemykám tlačítko Podepsat.");
+                        signButton.disabled = false;
+                        signButton.style.background = "#004033";
+                        signButton.style.color = "#ffffff";
+                        signButton.style.cursor = "pointer";
+                        signButton.style.opacity = "1";
+                        alertMessage.style.display = "none";
 
-                    // ✅ Odemknutí interakce s `iframe`
-                    iframe.style.pointerEvents = "auto"; 
-                }
+                        // ✅ Odemknutí interakce s `iframe`
+                        iframe.style.pointerEvents = "auto"; 
+                    }
+                });
             });
 
             // ✅ Spuštění podpisové relace po kliknutí na tlačítko + zarovnání viditelnosti
             signButton.addEventListener("click", () => {
                 console.log("🔏 Spouštím podpisovou relaci!");
-                
-                // ⏫ Posunutí iframe do viditelné oblasti před podpisem
+
+                // ⏫ Posunutí `iframe` do viditelné oblasti před podpisem
                 window.scrollTo({
                     top: iframe.offsetTop - 50,
                     behavior: "smooth"
@@ -189,5 +184,4 @@
     </script>
 </body>
 </html>
-
 
