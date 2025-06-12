@@ -65,7 +65,7 @@
         .iframe-container {
             width: 100%;
             height: calc(100vh - 160px);
-            overflow: hidden; /* ✅ Skrytí posuvníku */
+            overflow: hidden !important; /* ✅ Skrytí posuvníku */
             position: relative;
             display: none;
         }
@@ -75,6 +75,7 @@
             height: 200vh;
             border: none;
             pointer-events: none;
+            overflow: hidden; /* ✅ Skrytí posuvníku uvnitř `iframe` */
             scrollbar-width: none; /* ✅ Skrytí posuvníku ve Firefoxu */
         }
 
@@ -150,20 +151,30 @@
             console.log("✅ Iframe zdroj nastaven na:", iframe.src);
 
             // ✅ Odemknutí tlačítka po doscrollování dolů + Odemčení `iframe`
-            iframeContainer.addEventListener("scroll", () => {
-                const scrollPosition = Math.ceil(iframeContainer.scrollTop + iframeContainer.clientHeight);
-                const realHeight = iframeContainer.scrollHeight;
+            iframe.addEventListener("load", () => {
+                console.log("✅ Dokument v `iframe` byl plně načten!");
 
-                if (scrollPosition >= realHeight - 2) {
-                    console.log("✅ Uživatel doscrolloval na konec dokumentu, odemykám tlačítko Podepsat.");
-                    signButton.disabled = false;
-                    signButton.style.background = "#004033";
-                    signButton.style.color = "#ffffff";
-                    signButton.style.cursor = "pointer";
-                    signButton.style.opacity = "1";
-                    alertMessage.style.display = "none";
-                    iframe.style.pointerEvents = "auto"; 
-                }
+                setTimeout(() => {
+                    const iframeDoc = iframe.contentWindow.document.documentElement;
+                    const realHeight = iframeDoc.scrollHeight;
+
+                    console.log("📏 Skutečná výška dokumentu v `iframe`:", realHeight);
+
+                    iframeContainer.addEventListener("scroll", () => {
+                        const scrollPosition = Math.ceil(iframeContainer.scrollTop + iframeContainer.clientHeight);
+
+                        if (scrollPosition >= realHeight - 2) {
+                            console.log("✅ Uživatel doscrolloval na konec dokumentu, odemykám tlačítko Podepsat.");
+                            signButton.disabled = false;
+                            signButton.style.background = "#004033";
+                            signButton.style.color = "#ffffff";
+                            signButton.style.cursor = "pointer";
+                            signButton.style.opacity = "1";
+                            alertMessage.style.display = "none";
+                            iframe.style.pointerEvents = "auto"; 
+                        }
+                    });
+                }, 3000);
             });
 
             // ✅ Spuštění podpisové relace po kliknutí na tlačítko + Zarovnání viditelnosti
@@ -176,5 +187,6 @@
     </script>
 </body>
 </html>
+
 
 
