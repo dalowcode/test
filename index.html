@@ -65,7 +65,7 @@
         .iframe-container {
             width: 100%;
             height: calc(100vh - 160px);
-            overflow: auto;
+            overflow: hidden; /* ✅ Skrytí posuvníku */
             position: relative;
             display: none;
         }
@@ -75,6 +75,11 @@
             height: 200vh;
             border: none;
             pointer-events: none;
+            scrollbar-width: none; /* ✅ Skrytí posuvníku ve Firefoxu */
+        }
+
+        iframe::-webkit-scrollbar {
+            display: none; /* ✅ Skrytí posuvníku v Chrome, Safari */
         }
 
         #signButton {
@@ -119,7 +124,6 @@
             const iframe = document.getElementById("webview");
             const signButton = document.getElementById("signButton");
             const alertMessage = document.getElementById("alertMessage");
-            let isLocked = true;
 
             // ✅ Ověření hesla pro přístup k dokumentu
             unlockButton.addEventListener("click", () => {
@@ -145,49 +149,32 @@
 
             console.log("✅ Iframe zdroj nastaven na:", iframe.src);
 
-            // ⛔ Zamknutí dokumentu po načtení
-            iframe.addEventListener("load", () => {
-                console.log("✅ Dokument v `iframe` byl plně načten!");
-                
-                setTimeout(() => {
-                    const iframeDoc = iframe.contentWindow.document.documentElement;
-                    const realHeight = iframeDoc.scrollHeight; // ✅ Skutečná výška obsahu
+            // ✅ Odemknutí tlačítka po doscrollování dolů + Odemčení `iframe`
+            iframeContainer.addEventListener("scroll", () => {
+                const scrollPosition = Math.ceil(iframeContainer.scrollTop + iframeContainer.clientHeight);
+                const realHeight = iframeContainer.scrollHeight;
 
-                    console.log("📏 Skutečná výška dokumentu v `iframe`:", realHeight);
-
-                    iframeContainer.addEventListener("scroll", () => {
-                        const scrollPosition = Math.ceil(iframeContainer.scrollTop + iframeContainer.clientHeight);
-
-                        if (scrollPosition >= realHeight - 2) { // ✅ Ověření konce skutečné stránky
-                            console.log("✅ Uživatel doscrolloval na konec dokumentu, odemykám tlačítko Podepsat.");
-                            signButton.disabled = false;
-                            signButton.style.background = "#004033";
-                            signButton.style.color = "#ffffff";
-                            signButton.style.cursor = "pointer";
-                            signButton.style.opacity = "1";
-                            alertMessage.style.display = "none";
-
-                            // ✅ Odemknutí interakce s `iframe`
-                            iframe.style.pointerEvents = "auto"; 
-                        }
-                    });
-                }, 3000); // ✅ Krátká prodleva, aby se dokument načetl správně
+                if (scrollPosition >= realHeight - 2) {
+                    console.log("✅ Uživatel doscrolloval na konec dokumentu, odemykám tlačítko Podepsat.");
+                    signButton.disabled = false;
+                    signButton.style.background = "#004033";
+                    signButton.style.color = "#ffffff";
+                    signButton.style.cursor = "pointer";
+                    signButton.style.opacity = "1";
+                    alertMessage.style.display = "none";
+                    iframe.style.pointerEvents = "auto"; 
+                }
             });
 
-            // ✅ Spuštění podpisové relace po kliknutí na tlačítko + zarovnání viditelnosti
+            // ✅ Spuštění podpisové relace po kliknutí na tlačítko + Zarovnání viditelnosti
             signButton.addEventListener("click", () => {
                 console.log("🔏 Spouštím podpisovou relaci!");
-
-                // ⏫ Posunutí `iframe` do viditelné oblasti před podpisem
-                window.scrollTo({
-                    top: iframe.offsetTop - 50,
-                    behavior: "smooth"
-                });
-
+                window.scrollTo({ top: iframe.offsetTop - 50, behavior: "smooth" });
                 iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
             });
         });
     </script>
 </body>
 </html>
+
 
