@@ -74,7 +74,7 @@
             width: 100%;
             border: none;
             pointer-events: none;
-            sandbox="allow-scripts allow-same-origin allow-forms";
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-storage-access-by-user-activation";
         }
 
         #signButton {
@@ -104,7 +104,7 @@
     </div>
 
     <div class="iframe-container" id="iframeContainer">
-        <iframe id="webview" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+        <iframe id="webview" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-storage-access-by-user-activation"></iframe>
     </div>
 
     <footer>
@@ -121,8 +121,8 @@
             const alertMessage = document.getElementById("alertMessage");
 
             unlockButton.addEventListener("click", () => {
-                const enteredPassword = passwordInput.value.trim();
-
+                const enteredPassword = passwordInput.value; // Odstraněno trim() pro bezpečnostní kontrolu
+                
                 if (enteredPassword === "mojeheslo123") {
                     console.log("✅ Heslo správné, zobrazím dokument.");
                     iframeContainer.style.display = "block";
@@ -146,6 +146,19 @@
                 setTimeout(() => {
                     try {
                         const iframeDoc = iframe.contentWindow.document.documentElement;
-                        const realHeight
+                        const realHeight = iframeDoc.scrollHeight;
 
+                        console.log("📏 Nastavuji výšku iframe na:", realHeight);
+                        iframe.style.height = `${realHeight}px`;
+                        iframe.style.pointerEvents = "auto";
+                    } catch (error) {
+                        console.warn("⚠️ Nelze získat výšku dokumentu kvůli CORS omezením.");
+                    }
+                }, 3000);
+            });
+
+            signButton.addEventListener("click", () => {
+                console.log("🔏 Spouštím podpisovou relaci!");
+                window.scrollTo({ top: iframe.offsetTop - 50, behavior: "smooth" });
+                iframe.contentWindow.postMessage({ event
 
