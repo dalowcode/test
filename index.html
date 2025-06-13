@@ -14,7 +14,7 @@
         body, html {
             width: 100%;
             height: 100%;
-            overflow: auto; /* ✅ Povolení scrollování na hlavní stránce */
+            overflow: auto;
             display: flex;
             flex-direction: column;
             background: #ffffff;
@@ -65,23 +65,16 @@
 
         .iframe-container {
             width: 100%;
-            height: calc(100vh - 160px);
-            overflow: hidden !important; /* ✅ Skrytí posuvníku v `iframe` */
+            height: calc(100vh - 140px); /* Dynamicky nastaví výšku */
             position: relative;
             display: none;
         }
 
         iframe {
             width: 100%;
-            height: 200vh;
+            height: 100%;
             border: none;
             pointer-events: none;
-            overflow: hidden !important; /* ✅ Zabrání vzniku posuvníku */
-            scrollbar-width: none; /* ✅ Skrytí posuvníku ve Firefoxu */
-        }
-
-        iframe::-webkit-scrollbar {
-            display: none; /* ✅ Skrytí posuvníku v Chrome, Safari */
         }
 
         #signButton {
@@ -119,6 +112,15 @@
     </footer>
 
     <script>
+        function adjustIframeHeight() {
+            const headerHeight = document.querySelector("header").offsetHeight;
+            const footerHeight = document.querySelector("footer").offsetHeight;
+            const totalHeight = window.innerHeight - (headerHeight + footerHeight);
+
+            document.getElementById("iframeContainer").style.height = totalHeight + "px";
+            document.getElementById("webview").style.height = totalHeight + "px";
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             const passwordInput = document.getElementById("passwordInput");
             const unlockButton = document.getElementById("unlockButton");
@@ -127,7 +129,9 @@
             const signButton = document.getElementById("signButton");
             const alertMessage = document.getElementById("alertMessage");
 
-            // ✅ Ověření hesla pro přístup k dokumentu
+            window.addEventListener("load", adjustIframeHeight);
+            window.addEventListener("resize", adjustIframeHeight);
+
             unlockButton.addEventListener("click", () => {
                 const enteredPassword = passwordInput.value.trim();
 
@@ -141,7 +145,6 @@
                 }
             });
 
-            // ✅ Načtení URL dokumentu do iframe
             const urlParams = new URLSearchParams(window.location.search);
             const bioidValue = urlParams.get("bioid");
 
@@ -151,7 +154,6 @@
 
             console.log("✅ Iframe zdroj nastaven na:", iframe.src);
 
-            // ✅ Odemknutí tlačítka po doscrollování dolů + Odemčení `iframe`
             iframe.addEventListener("load", () => {
                 console.log("✅ Dokument v `iframe` byl plně načten!");
 
@@ -178,7 +180,6 @@
                 }, 3000);
             });
 
-            // ✅ Spuštění podpisové relace po kliknutí na tlačítko + Zarovnání viditelnosti
             signButton.addEventListener("click", () => {
                 console.log("🔏 Spouštím podpisovou relaci!");
                 window.scrollTo({ top: iframe.offsetTop - 50, behavior: "smooth" });
@@ -188,3 +189,4 @@
     </script>
 </body>
 </html>
+
