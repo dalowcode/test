@@ -14,7 +14,7 @@
         body, html {
             width: 100%;
             height: 100%;
-            overflow: auto;
+            overflow: auto; /* ✅ Hlavní stránka bude scrollovatelná */
             display: flex;
             flex-direction: column;
             background: #ffffff;
@@ -65,16 +65,20 @@
 
         .iframe-container {
             width: 100%;
-            height: calc(100vh - 140px); /* Dynamicky nastaví výšku */
+            height: auto; /* ✅ Automatická výška */
             position: relative;
             display: none;
         }
 
         iframe {
             width: 100%;
-            height: 100%;
             border: none;
-            pointer-events: none;
+            overflow: hidden !important; /* ✅ Zabrání scrollování uvnitř iframe */
+            scrollbar-width: none;
+        }
+
+        iframe::-webkit-scrollbar {
+            display: none;
         }
 
         #signButton {
@@ -115,10 +119,20 @@
         function adjustIframeHeight() {
             const headerHeight = document.querySelector("header").offsetHeight;
             const footerHeight = document.querySelector("footer").offsetHeight;
-            const totalHeight = window.innerHeight - (headerHeight + footerHeight);
+            const iframe = document.getElementById("webview");
 
-            document.getElementById("iframeContainer").style.height = totalHeight + "px";
-            document.getElementById("webview").style.height = totalHeight + "px";
+            iframe.onload = function () {
+                setTimeout(() => {
+                    try {
+                        const iframeDoc = iframe.contentWindow.document.documentElement;
+                        const realHeight = iframeDoc.scrollHeight;
+                        iframe.style.height = realHeight + "px"; // ✅ Dynamická výška
+                        console.log("📏 Nastavuji výšku iframe na:", realHeight);
+                    } catch (error) {
+                        console.warn("⚠️ Nelze získat výšku dokumentu kvůli CORS omezením.");
+                    }
+                }, 2000);
+            };
         }
 
         document.addEventListener("DOMContentLoaded", () => {
