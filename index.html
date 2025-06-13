@@ -74,7 +74,6 @@
             width: 100%;
             border: none;
             pointer-events: none;
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-storage-access-by-user-activation";
         }
 
         #signButton {
@@ -104,7 +103,7 @@
     </div>
 
     <div class="iframe-container" id="iframeContainer">
-        <iframe id="webview" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-storage-access-by-user-activation"></iframe>
+        <iframe id="webview"></iframe>
     </div>
 
     <footer>
@@ -121,8 +120,8 @@
             const alertMessage = document.getElementById("alertMessage");
 
             unlockButton.addEventListener("click", () => {
-                const enteredPassword = passwordInput.value; // Odstraněno trim() pro bezpečnostní kontrolu
-                
+                const enteredPassword = passwordInput.value.trim();
+
                 if (enteredPassword === "mojeheslo123") {
                     console.log("✅ Heslo správné, zobrazím dokument.");
                     iframeContainer.style.display = "block";
@@ -160,5 +159,9 @@
             signButton.addEventListener("click", () => {
                 console.log("🔏 Spouštím podpisovou relaci!");
                 window.scrollTo({ top: iframe.offsetTop - 50, behavior: "smooth" });
-                iframe.contentWindow.postMessage({ event
-
+                iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
+            });
+        });
+    </script>
+</body>
+</html>
