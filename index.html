@@ -74,7 +74,7 @@
             width: 100%;
             border: none;
             pointer-events: none;
-            sandbox="allow-scripts allow-same-origin";
+            sandbox="allow-scripts allow-same-origin allow-forms";
         }
 
         #signButton {
@@ -104,7 +104,7 @@
     </div>
 
     <div class="iframe-container" id="iframeContainer">
-        <iframe id="webview" sandbox="allow-scripts allow-same-origin"></iframe>
+        <iframe id="webview" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
     </div>
 
     <footer>
@@ -146,25 +146,6 @@
                 setTimeout(() => {
                     try {
                         const iframeDoc = iframe.contentWindow.document.documentElement;
-                        const realHeight = iframeDoc.scrollHeight;
-
-                        console.log("📏 Nastavuji výšku iframe na:", realHeight);
-                        iframe.style.height = `${realHeight}px`;
-                        iframe.style.pointerEvents = "auto";
-                    } catch (error) {
-                        console.warn("⚠️ Nelze získat výšku dokumentu kvůli CORS omezením.");
-                    }
-                }, 3000);
-            });
-
-            signButton.addEventListener("click", () => {
-                console.log("🔏 Spouštím podpisovou relaci!");
-                window.scrollTo({ top: iframe.offsetTop - 50, behavior: "smooth" });
-                iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
-            });
-        });
-    </script>
-</body>
-</html>
+                        const realHeight
 
 
