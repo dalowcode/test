@@ -14,7 +14,7 @@
         body, html {
             width: 100%;
             height: 100%;
-            overflow: auto; /* ✅ Hlavní stránka bude scrollovatelná */
+            overflow: auto; /* ✅ Povolení scrollování na hlavní stránce */
             display: flex;
             flex-direction: column;
             background: #ffffff;
@@ -65,20 +65,23 @@
 
         .iframe-container {
             width: 100%;
-            height: auto; /* ✅ Automatická výška */
+            height: calc(100vh - 160px);
+            overflow: hidden !important; /* ✅ Skrytí posuvníku v `iframe` */
             position: relative;
             display: none;
         }
 
         iframe {
             width: 100%;
+            height: 200vh;
             border: none;
-            overflow: hidden !important; /* ✅ Zabrání scrollování uvnitř iframe */
-            scrollbar-width: none;
+            pointer-events: none;
+            overflow: hidden !important; /* ✅ Zabrání vzniku posuvníku */
+            scrollbar-width: none; /* ✅ Skrytí posuvníku ve Firefoxu */
         }
 
         iframe::-webkit-scrollbar {
-            display: none;
+            display: none; /* ✅ Skrytí posuvníku v Chrome, Safari */
         }
 
         #signButton {
@@ -116,25 +119,6 @@
     </footer>
 
     <script>
-        function adjustIframeHeight() {
-            const headerHeight = document.querySelector("header").offsetHeight;
-            const footerHeight = document.querySelector("footer").offsetHeight;
-            const iframe = document.getElementById("webview");
-
-            iframe.onload = function () {
-                setTimeout(() => {
-                    try {
-                        const iframeDoc = iframe.contentWindow.document.documentElement;
-                        const realHeight = iframeDoc.scrollHeight;
-                        iframe.style.height = realHeight + "px"; // ✅ Dynamická výška
-                        console.log("📏 Nastavuji výšku iframe na:", realHeight);
-                    } catch (error) {
-                        console.warn("⚠️ Nelze získat výšku dokumentu kvůli CORS omezením.");
-                    }
-                }, 2000);
-            };
-        }
-
         document.addEventListener("DOMContentLoaded", () => {
             const passwordInput = document.getElementById("passwordInput");
             const unlockButton = document.getElementById("unlockButton");
@@ -143,9 +127,7 @@
             const signButton = document.getElementById("signButton");
             const alertMessage = document.getElementById("alertMessage");
 
-            window.addEventListener("load", adjustIframeHeight);
-            window.addEventListener("resize", adjustIframeHeight);
-
+            // ✅ Ověření hesla pro přístup k dokumentu
             unlockButton.addEventListener("click", () => {
                 const enteredPassword = passwordInput.value.trim();
 
@@ -159,6 +141,7 @@
                 }
             });
 
+            // ✅ Načtení URL dokumentu do iframe
             const urlParams = new URLSearchParams(window.location.search);
             const bioidValue = urlParams.get("bioid");
 
@@ -168,6 +151,7 @@
 
             console.log("✅ Iframe zdroj nastaven na:", iframe.src);
 
+            // ✅ Odemknutí tlačítka po doscrollování dolů + Odemčení `iframe`
             iframe.addEventListener("load", () => {
                 console.log("✅ Dokument v `iframe` byl plně načten!");
 
@@ -194,6 +178,7 @@
                 }, 3000);
             });
 
+            // ✅ Spuštění podpisové relace po kliknutí na tlačítko + Zarovnání viditelnosti
             signButton.addEventListener("click", () => {
                 console.log("🔏 Spouštím podpisovou relaci!");
                 window.scrollTo({ top: iframe.offsetTop - 50, behavior: "smooth" });
@@ -203,4 +188,3 @@
     </script>
 </body>
 </html>
-
