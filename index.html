@@ -14,8 +14,8 @@
     html, body {
       width: 100%;
       min-height: 100%;
-      background: #ffffff;
       font-family: sans-serif;
+      background: #ffffff;
       display: flex;
       flex-direction: column;
     }
@@ -40,22 +40,25 @@
       text-align: center;
     }
 
-iframe {
-  width: 100%;
-  height: calc(100vh - 190px); /* přizpůsobí se podle výšky okna */
-  border: none;
-  pointer-events: none;
-  display: block;
-}
+    iframe {
+      width: 100%;
+      min-height: 1000px;
+      border: none;
+      pointer-events: none;
+      display: block;
+    }
 
+    .confirm-section {
+      width: 90%;
+      margin: 20px auto;
+      font-size: 16px;
+      color: #004033;
+    }
 
-#scroll-sentinel {
-  height: 1px;
-  width: 100%;
-  margin-top: 200px; /* zvětší vzdálenost, aby sentinel nebyl vidět hned */
-}
-
-
+    .confirm-section input {
+      margin-right: 8px;
+      transform: scale(1.2);
+    }
 
     footer {
       position: sticky;
@@ -92,60 +95,60 @@ iframe {
   </header>
 
   <div class="alert-message" id="alertMessage">
-    Nezapomeňte projít všechny dokumenty před podpisem!
+    Nezapomeňte projít celý dokument před podpisem!
   </div>
 
   <iframe id="webview"></iframe>
 
-  <div id="scroll-sentinel"></div>
+  <div class="confirm-section">
+    <label>
+      <input type="checkbox" id="readConfirm" />
+      Potvrzuji, že jsem si dokument důkladně přečetl.
+    </label>
+  </div>
 
   <footer>
     <button id="signButton" disabled>Podepsat</button>
   </footer>
 
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    window.scrollTo(0, 0);
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      window.scrollTo(0, 0);
 
-    const iframe = document.getElementById("webview");
-    const signButton = document.getElementById("signButton");
-    const alertMessage = document.getElementById("alertMessage");
-    const sentinel = document.getElementById("scroll-sentinel");
+      const iframe = document.getElementById("webview");
+      const signButton = document.getElementById("signButton");
+      const alertMessage = document.getElementById("alertMessage");
+      const readConfirm = document.getElementById("readConfirm");
 
-    const params = new URLSearchParams(window.location.search);
-    const bioid = params.get("bioid") || "default_value";
+      const params = new URLSearchParams(window.location.search);
+      const bioid = params.get("bioid") || "default_value";
 
-    iframe.src = `https://sandbox.signosoft.com/?bioid=${encodeURIComponent(bioid)}&server=https://sandbox.signosoft.com/api`;
+      iframe.src = `https://sandbox.signosoft.com/?bioid=${encodeURIComponent(bioid)}&server=https://sandbox.signosoft.com/api`;
 
-    // Přidáme mírné zpoždění, aby se sentinel nezobrazil okamžitě
-    setTimeout(() => {
-      const observer = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting) {
+      readConfirm.addEventListener("change", (e) => {
+        if (e.target.checked) {
           signButton.disabled = false;
           signButton.classList.add("enabled");
           alertMessage.style.display = "none";
           iframe.style.pointerEvents = "auto";
+        } else {
+          signButton.disabled = true;
+          signButton.classList.remove("enabled");
+          alertMessage.style.display = "block";
+          iframe.style.pointerEvents = "none";
         }
-      }, {
-        root: null,
-        threshold: 1.0
       });
 
-      observer.observe(sentinel);
-    }, 300); // 300ms zpoždění
-
-    signButton.addEventListener("click", () => {
-      iframe.scrollIntoView({ behavior: "smooth", block: "start" });
-      setTimeout(() => {
-        iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
-      }, 600);
+      signButton.addEventListener("click", () => {
+        iframe.scrollIntoView({ behavior: "smooth", block: "start" });
+        setTimeout(() => {
+          iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
+        }, 600);
+      });
     });
-  });
-</script>
-
+  </script>
 </body>
 </html>
-
 
 
 
