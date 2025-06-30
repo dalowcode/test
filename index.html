@@ -109,14 +109,15 @@
       let hasScrolled = false;
 
       window.addEventListener("scroll", () => {
-        const scrollBottom = window.scrollY + window.innerHeight;
-        const fullHeight = document.body.offsetHeight;
+        const scrollTop = window.scrollY;
+        const viewportHeight = window.innerHeight;
+        const fullHeight = document.documentElement.scrollHeight;
 
-        if (!hasScrolled && window.scrollY > 0) {
+        if (!hasScrolled && scrollTop > 20) {
           hasScrolled = true;
         }
 
-        if (hasScrolled && scrollBottom >= fullHeight - 10) {
+        if (hasScrolled && (scrollTop + viewportHeight >= fullHeight - 50)) {
           signButton.disabled = false;
           signButton.classList.add("enabled");
           alertMessage.style.display = "none";
@@ -125,7 +126,7 @@
       });
 
       signButton.addEventListener("click", () => {
-        iframe.scrollIntoView({ behavior: "smooth", block: "center" });
+        iframe.scrollIntoView({ behavior: "smooth", block: "start" });
 
         setTimeout(() => {
           iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
@@ -135,6 +136,7 @@
   </script>
 </body>
 </html>
+
 
 
 
