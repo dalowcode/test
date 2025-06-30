@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Podpis dokumentu</title>
   <style>
     * {
@@ -14,14 +14,13 @@
     body, html {
       width: 100%;
       min-height: 100%;
+      font-family: sans-serif;
+      background: #ffffff;
       display: flex;
       flex-direction: column;
-      background: #ffffff;
-      font-family: sans-serif;
     }
 
     header {
-      width: 100%;
       height: 70px;
       background: #c4de00;
       display: flex;
@@ -30,44 +29,42 @@
     }
 
     .alert-message {
-      width: 90%;
+      margin: 20px auto;
+      padding: 12px;
       background: #004033;
       color: #ffffff;
-      text-align: center;
       font-size: 16px;
       font-weight: bold;
-      padding: 12px;
-      margin: 20px auto;
       border-radius: 15px;
+      width: 90%;
+      text-align: center;
     }
 
     .iframe-container {
       width: 100%;
-      overflow: hidden;
     }
 
     iframe {
       width: 100%;
-      height: 160vh;
+      height: 300vh; /* prodloužená výška pro zajištění dostatečného scrollu */
       border: none;
       pointer-events: none;
     }
 
     #scroll-sentinel {
-      width: 100%;
       height: 1px;
-      margin-bottom: 100px;
+      width: 100%;
+      margin-bottom: 200px; /* volitelné dolní odsazení */
     }
 
     footer {
-      width: 100%;
+      position: sticky;
+      bottom: 0;
       height: 70px;
       background: #c4de00;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: sticky;
-      bottom: 0;
       z-index: 10;
     }
 
@@ -94,7 +91,7 @@
     <h2>Podpis dokumentu</h2>
   </header>
 
-  <div id="alertMessage" class="alert-message">
+  <div class="alert-message" id="alertMessage">
     Nezapomeňte projít všechny dokumenty před podpisem!
   </div>
 
@@ -114,12 +111,10 @@
       const signButton = document.getElementById("signButton");
       const alertMessage = document.getElementById("alertMessage");
 
-      const urlParams = new URLSearchParams(window.location.search);
-      const bioidValue = urlParams.get("bioid");
+      const params = new URLSearchParams(window.location.search);
+      const bioid = params.get("bioid") || "default_value";
 
-      iframe.src = bioidValue
-        ? `https://sandbox.signosoft.com/?bioid=${encodeURIComponent(bioidValue)}&server=https://sandbox.signosoft.com/api`
-        : "https://sandbox.signosoft.com/?bioid=default_value&server=https://sandbox.signosoft.com/api";
+      iframe.src = `https://sandbox.signosoft.com/?bioid=${encodeURIComponent(bioid)}&server=https://sandbox.signosoft.com/api`;
 
       const sentinel = document.getElementById("scroll-sentinel");
 
@@ -132,14 +127,13 @@
         }
       }, {
         root: null,
-        threshold: 0.5
+        threshold: 1.0
       });
 
       observer.observe(sentinel);
 
       signButton.addEventListener("click", () => {
         iframe.scrollIntoView({ behavior: "smooth", block: "center" });
-
         setTimeout(() => {
           iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
         }, 600);
@@ -148,6 +142,7 @@
   </script>
 </body>
 </html>
+
 
 
 
