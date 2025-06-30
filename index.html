@@ -110,10 +110,8 @@
 
       const params = new URLSearchParams(window.location.search);
       const bioid = params.get("bioid") || "default_value";
-      const height = params.get("height") || "160vh";
 
       iframe.src = `https://sandbox.signosoft.com/?bioid=${encodeURIComponent(bioid)}&server=https://sandbox.signosoft.com/api`;
-      iframe.style.height = height;
 
       const observer = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting) {
@@ -131,7 +129,6 @@
 
       signButton.addEventListener("click", () => {
         iframe.scrollIntoView({ behavior: "smooth", block: "start" });
-
         setTimeout(() => {
           iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
         }, 600);
