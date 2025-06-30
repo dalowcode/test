@@ -1,191 +1,141 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Podpis dokumentu</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Podpis dokumentu</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        body, html {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            background: #ffffff;
-        }
+    body, html {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: #ffffff;
+    }
 
-        header, footer {
-            width: 100%;
-            height: 70px;
-            background: #c4de00;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    header, footer {
+      width: 100%;
+      height: 70px;
+      background: #c4de00;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-        .alert-message {
-            width: 90%;
-            background: #004033;
-            color: #ffffff;
-            text-align: center;
-            font-size: 16px;
-            font-weight: bold;
-            padding: 12px;
-            margin: 20px auto;
-            border-radius: 15px;
-        }
+    .alert-message {
+      width: 90%;
+      background: #004033;
+      color: #ffffff;
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+      padding: 12px;
+      margin: 20px auto;
+      border-radius: 15px;
+    }
 
-        .password-container {
-            text-align: center;
-            margin: 20px auto;
-        }
+    .iframe-container {
+      width: 100%;
+      height: calc(100vh - 160px);
+      overflow: auto;
+      position: relative;
+      display: block;
+    }
 
-        #passwordInput {
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
+    iframe {
+      width: 100%;
+      height: 200vh;
+      border: none;
+      pointer-events: none;
+    }
 
-        #unlockButton {
-            padding: 10px 20px;
-            font-size: 16px;
-            background: #004033;
-            color: #ffffff;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        .iframe-container {
-            width: 100%;
-            height: calc(100vh - 160px);
-            overflow: auto;
-            position: relative;
-            display: none;
-        }
-
-        iframe {
-            width: 100%;
-            height: 200vh;
-            border: none;
-            pointer-events: none;
-        }
-
-        #signButton {
-            padding: 10px 20px;
-            font-size: 18px;
-            background: #004033;
-            color: #ffffff;
-            border: none;
-            cursor: not-allowed;
-            opacity: 0.5;
-            border-radius: 10px;
-        }
-    </style>
+    #signButton {
+      padding: 10px 20px;
+      font-size: 18px;
+      background: #004033;
+      color: #ffffff;
+      border: none;
+      cursor: not-allowed;
+      opacity: 0.5;
+      border-radius: 10px;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h2>Podpis dokumentu</h2>
-    </header>
+  <header>
+    <h2>Podpis dokumentu</h2>
+  </header>
 
-    <div id="alertMessage" class="alert-message">
-        Nezapomeňte projít všechny dokumenty před podpisem!
-    </div>
+  <div id="alertMessage" class="alert-message">
+    Nezapomeňte projít všechny dokumenty před podpisem!
+  </div>
 
-    <div class="password-container">
-        <input type="password" id="passwordInput" placeholder="Zadejte heslo">
-        <button id="unlockButton">Odemknout dokument</button>
-    </div>
+  <div class="iframe-container" id="iframeContainer">
+    <iframe id="webview"></iframe>
+  </div>
 
-    <div class="iframe-container" id="iframeContainer">
-        <iframe id="webview"></iframe>
-    </div>
+  <footer>
+    <button id="signButton" disabled>Podepsat</button>
+  </footer>
 
-    <footer>
-        <button id="signButton" disabled>Podepsat</button>
-    </footer>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const iframeContainer = document.getElementById("iframeContainer");
+      const iframe = document.getElementById("webview");
+      const signButton = document.getElementById("signButton");
+      const alertMessage = document.getElementById("alertMessage");
+      let isLocked = true;
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const passwordInput = document.getElementById("passwordInput");
-            const unlockButton = document.getElementById("unlockButton");
-            const iframeContainer = document.getElementById("iframeContainer");
-            const iframe = document.getElementById("webview");
-            const signButton = document.getElementById("signButton");
-            const alertMessage = document.getElementById("alertMessage");
-            let isLocked = true;
+      const urlParams = new URLSearchParams(window.location.search);
+      const bioidValue = urlParams.get("bioid");
 
-            // ✅ Ověření hesla pro přístup k dokumentu
-            unlockButton.addEventListener("click", () => {
-                const enteredPassword = passwordInput.value.trim();
+      iframe.src = bioidValue
+        ? `https://sandbox.signosoft.com/?bioid=${encodeURIComponent(bioidValue)}&server=https://sandbox.signosoft.com/api`
+        : "https://sandbox.signosoft.com/?bioid=default_value&server=https://sandbox.signosoft.com/api";
 
-                if (enteredPassword === "mojeheslo123") {
-                    console.log("✅ Heslo správné, zobrazím dokument.");
-                    iframeContainer.style.display = "block";
-                    passwordInput.style.display = "none";
-                    unlockButton.style.display = "none";
-                } else {
-                    alert("❌ Nesprávné heslo!");
-                }
-            });
+      console.log("✅ Iframe zdroj nastaven na:", iframe.src);
 
-            // ✅ Načtení URL dokumentu do iframe
-            const urlParams = new URLSearchParams(window.location.search);
-            const bioidValue = urlParams.get("bioid");
+      window.addEventListener("message", (event) => {
+        if (event.data && event.data.event === "browsableLoaded" && isLocked) {
+          console.log("🔐 Dokument načten! Zamykám interakci.");
+          iframe.style.pointerEvents = "none";
+          isLocked = true;
+        }
+      });
 
-            iframe.src = bioidValue 
-                ? `https://sandbox.signosoft.com/?bioid=${encodeURIComponent(bioidValue)}&server=https://sandbox.signosoft.com/api` 
-                : "https://sandbox.signosoft.com/?bioid=default_value&server=https://sandbox.signosoft.com/api";
+      iframeContainer.addEventListener("scroll", () => {
+        const scrollPosition = iframeContainer.scrollTop + iframeContainer.clientHeight;
+        const scrollHeight = iframeContainer.scrollHeight;
 
-            console.log("✅ Iframe zdroj nastaven na:", iframe.src);
+        if (scrollPosition >= scrollHeight - 10) {
+          console.log("✅ Uživatel doscrolloval dolů, odemykám tlačítko Podepsat.");
+          signButton.disabled = false;
+          signButton.style.background = "#004033";
+          signButton.style.color = "#ffffff";
+          signButton.style.cursor = "pointer";
+          signButton.style.opacity = "1";
+          alertMessage.style.display = "none";
 
-            // ⛔ Zamknutí dokumentu po načtení
-            window.addEventListener("message", (event) => {
-                if (event.data && event.data.event === "browsableLoaded" && isLocked) {
-                    console.log("🔐 Dokument načten! Zamykám interakci.");
-                    iframe.style.pointerEvents = "none";
-                    isLocked = true;
-                }
-            });
+          iframe.style.pointerEvents = "auto";
+        }
+      });
 
-            // ✅ Odemknutí tlačítka po doscrollování dolů
-            iframeContainer.addEventListener("scroll", () => {
-                const scrollPosition = iframeContainer.scrollTop + iframeContainer.clientHeight;
-                const scrollHeight = iframeContainer.scrollHeight;
-
-                if (scrollPosition >= scrollHeight - 10) {
-                    console.log("✅ Uživatel doscrolloval dolů, odemykám tlačítko Podepsat.");
-                    signButton.disabled = false;
-                    signButton.style.background = "#004033";
-                    signButton.style.color = "#ffffff";
-                    signButton.style.cursor = "pointer";
-                    signButton.style.opacity = "1";
-                    alertMessage.style.display = "none";
-
-                    // ✅ Odemknutí interakce s `iframe`
-                    iframe.style.pointerEvents = "auto"; 
-                }
-            });
-
-            // ✅ Spuštění podpisové relace po kliknutí na tlačítko + zarovnání viditelnosti
-            signButton.addEventListener("click", () => {
-                console.log("🔏 Spouštím podpisovou relaci!");
-                
-                // ⏫ Posunutí iframe do viditelné oblasti před podpisem
-                window.scrollTo({
-                    top: iframe.offsetTop - 50,
-                    behavior: "smooth"
-                });
-
-                iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
-            });
+      signButton.addEventListener("click", () => {
+        console.log("🔏 Spouštím podpisovou relaci!");
+        window.scrollTo({
+          top: iframe.offsetTop - 50,
+          behavior: "smooth"
         });
-    </script>
+
+        iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
+      });
+    });
+  </script>
 </body>
 </html>
