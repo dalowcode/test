@@ -122,20 +122,18 @@
       });
 
       signButton.addEventListener("click", () => {
-        // Scroll iframe do viditelné části
-        window.scrollTo({
-          top: iframe.offsetTop - 50,
-          behavior: "smooth"
-        });
+        // Přesun iframe doprostřed obrazovky
+        iframe.scrollIntoView({ behavior: "smooth", block: "center" });
 
-        // Po krátké pauze spustí podpis
+        // Spuštění podpisu po scrollu
         setTimeout(() => {
           iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
-        }, 500);
+        }, 600);
       });
     });
   </script>
 </body>
 </html>
+
 
 
