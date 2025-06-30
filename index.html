@@ -52,8 +52,9 @@ iframe {
 #scroll-sentinel {
   height: 1px;
   width: 100%;
-  margin-bottom: 400px; /* zvětšíme, aby byl mimo obrazovku */
+  margin-top: 200px; /* zvětší vzdálenost, aby sentinel nebyl vidět hned */
 }
+
 
 
     footer {
@@ -102,20 +103,22 @@ iframe {
     <button id="signButton" disabled>Podepsat</button>
   </footer>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      window.scrollTo(0, 0);
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    window.scrollTo(0, 0);
 
-      const iframe = document.getElementById("webview");
-      const signButton = document.getElementById("signButton");
-      const alertMessage = document.getElementById("alertMessage");
-      const sentinel = document.getElementById("scroll-sentinel");
+    const iframe = document.getElementById("webview");
+    const signButton = document.getElementById("signButton");
+    const alertMessage = document.getElementById("alertMessage");
+    const sentinel = document.getElementById("scroll-sentinel");
 
-      const params = new URLSearchParams(window.location.search);
-      const bioid = params.get("bioid") || "default_value";
+    const params = new URLSearchParams(window.location.search);
+    const bioid = params.get("bioid") || "default_value";
 
-      iframe.src = `https://sandbox.signosoft.com/?bioid=${encodeURIComponent(bioid)}&server=https://sandbox.signosoft.com/api`;
+    iframe.src = `https://sandbox.signosoft.com/?bioid=${encodeURIComponent(bioid)}&server=https://sandbox.signosoft.com/api`;
 
+    // Přidáme mírné zpoždění, aby se sentinel nezobrazil okamžitě
+    setTimeout(() => {
       const observer = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting) {
           signButton.disabled = false;
@@ -129,15 +132,17 @@ iframe {
       });
 
       observer.observe(sentinel);
+    }, 300); // 300ms zpoždění
 
-      signButton.addEventListener("click", () => {
-        iframe.scrollIntoView({ behavior: "smooth", block: "start" });
-        setTimeout(() => {
-          iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
-        }, 600);
-      });
+    signButton.addEventListener("click", () => {
+      iframe.scrollIntoView({ behavior: "smooth", block: "start" });
+      setTimeout(() => {
+        iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
+      }, 600);
     });
-  </script>
+  });
+</script>
+
 </body>
 </html>
 
