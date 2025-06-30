@@ -47,6 +47,12 @@
       display: block;
     }
 
+    #scroll-sentinel {
+      height: 1px;
+      width: 100%;
+      margin-bottom: 120px;
+    }
+
     footer {
       position: sticky;
       bottom: 0;
@@ -87,6 +93,8 @@
 
   <iframe id="webview"></iframe>
 
+  <div id="scroll-sentinel"></div>
+
   <footer>
     <button id="signButton" disabled>Podepsat</button>
   </footer>
@@ -98,6 +106,7 @@
       const iframe = document.getElementById("webview");
       const signButton = document.getElementById("signButton");
       const alertMessage = document.getElementById("alertMessage");
+      const sentinel = document.getElementById("scroll-sentinel");
 
       const params = new URLSearchParams(window.location.search);
       const bioid = params.get("bioid") || "default_value";
@@ -106,24 +115,19 @@
       iframe.src = `https://sandbox.signosoft.com/?bioid=${encodeURIComponent(bioid)}&server=https://sandbox.signosoft.com/api`;
       iframe.style.height = height;
 
-      let hasScrolled = false;
-
-      window.addEventListener("scroll", () => {
-        const scrollTop = window.scrollY;
-        const viewportHeight = window.innerHeight;
-        const fullHeight = document.documentElement.scrollHeight;
-
-        if (!hasScrolled && scrollTop > 20) {
-          hasScrolled = true;
-        }
-
-        if (hasScrolled && (scrollTop + viewportHeight >= fullHeight - 50)) {
+      const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
           signButton.disabled = false;
           signButton.classList.add("enabled");
           alertMessage.style.display = "none";
           iframe.style.pointerEvents = "auto";
         }
+      }, {
+        root: null,
+        threshold: 1.0
       });
+
+      observer.observe(sentinel);
 
       signButton.addEventListener("click", () => {
         iframe.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -136,6 +140,7 @@
   </script>
 </body>
 </html>
+
 
 
 
