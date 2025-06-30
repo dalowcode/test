@@ -1,179 +1,58 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Podpis dokumentu</title>
+  <meta charset="UTF-8">
+  <title>PostMessage sniffer</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html, body {
-      width: 100%;
-      min-height: 100%;
-      font-family: sans-serif;
-      background: #ffffff;
-      display: flex;
-      flex-direction: column;
-    }
-
-    header {
-      height: 70px;
-      background: #c4de00;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .alert-message {
-      width: 90%;
-      margin: 20px auto;
-      padding: 12px;
-      background: #004033;
-      color: #ffffff;
-      font-size: 16px;
-      font-weight: bold;
-      border-radius: 15px;
-      text-align: center;
-    }
-
     iframe {
       width: 100%;
-      min-height: 1000px;
-      border: none;
-      pointer-events: none;
-      display: block;
+      min-height: 800px;
+      border: 2px dashed #ccc;
+      margin-top: 20px;
     }
 
-    #scrollSentinel {
-      height: 1px;
-      width: 100%;
-      margin-bottom: 20px;
-    }
-
-    .confirm-section {
-      width: 90%;
-      margin: 20px auto;
-      font-size: 16px;
-      color: #004033;
-      display: none;
-    }
-
-    .confirm-section.visible {
-      display: block;
-    }
-
-    .confirm-section input {
-      margin-right: 8px;
-      transform: scale(1.2);
-    }
-
-    footer {
-      position: sticky;
-      bottom: 0;
-      height: 70px;
-      background: #c4de00;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10;
-    }
-
-    #signButton {
-      padding: 10px 20px;
-      font-size: 18px;
-      background: #004033;
-      color: #ffffff;
-      border: none;
-      border-radius: 10px;
-      cursor: not-allowed;
-      opacity: 0.5;
-      transition: all 0.3s ease;
-    }
-
-    #signButton.enabled {
-      cursor: pointer;
-      opacity: 1;
+    pre {
+      background: #f5f5f5;
+      padding: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-size: 14px;
+      border: 1px solid #ddd;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h2>Podpis dokumentu</h2>
-  </header>
-
-  <div class="alert-message" id="alertMessage">
-    Nezapomeňte projít celý dokument před podpisem!
-  </div>
+  <h2>Test odchytu zpráv z iframe</h2>
+  <p>Všechno, co přijde z iframe (sandbox.signosoft.com), se vypíše níže:</p>
 
   <iframe id="webview"></iframe>
 
-  <div id="scrollSentinel"></div>
-
-  <div class="confirm-section" id="confirmSection">
-    <label>
-      <input type="checkbox" id="readConfirm" />
-      Potvrzuji, že jsem si dokument důkladně přečetl.
-    </label>
-  </div>
-
-  <footer>
-    <button id="signButton" disabled>Podepsat</button>
-  </footer>
+  <h3>Zachycené zprávy:</h3>
+  <pre id="log"></pre>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      window.scrollTo(0, 0);
+    const iframe = document.getElementById("webview");
+    const log = document.getElementById("log");
 
-      const iframe = document.getElementById("webview");
-      const signButton = document.getElementById("signButton");
-      const alertMessage = document.getElementById("alertMessage");
-      const readConfirm = document.getElementById("readConfirm");
-      const confirmSection = document.getElementById("confirmSection");
-      const sentinel = document.getElementById("scrollSentinel");
+    // Načti iframe s bioid
+    const params = new URLSearchParams(window.location.search);
+    const bioid = params.get("bioid") || "demo";
+    iframe.src = `https://sandbox.signosoft.com/?bioid=${encodeURIComponent(bioid)}&server=https://sandbox.signosoft.com/api`;
 
-      const params = new URLSearchParams(window.location.search);
-      const bioid = params.get("bioid") || "default_value";
-      iframe.src = `https://sandbox.signosoft.com/?bioid=${encodeURIComponent(bioid)}&server=https://sandbox.signosoft.com/api`;
+    // Zachyť příchozí zprávy z iframe
+    window.addEventListener("message", (event) => {
+      if (!event.origin.includes("sandbox.signosoft.com")) return;
 
-      const observer = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting) {
-          confirmSection.classList.add("visible");
-        }
-      }, {
-        root: null,
-        threshold: 1.0
-      });
+      const time = new Date().toLocaleTimeString();
+      const msg = `[${time}] ${JSON.stringify(event.data, null, 2)}`;
 
-      observer.observe(sentinel);
-
-      readConfirm.addEventListener("change", (e) => {
-        if (e.target.checked) {
-          signButton.disabled = false;
-          signButton.classList.add("enabled");
-          alertMessage.style.display = "none";
-          iframe.style.pointerEvents = "auto";
-        } else {
-          signButton.disabled = true;
-          signButton.classList.remove("enabled");
-          alertMessage.style.display = "block";
-          iframe.style.pointerEvents = "none";
-        }
-      });
-
-      signButton.addEventListener("click", () => {
-        iframe.scrollIntoView({ behavior: "smooth", block: "start" });
-        setTimeout(() => {
-          iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
-        }, 600);
-      });
+      console.log("Zpráva z iframe:", event.data);
+      log.textContent += msg + "\n\n";
     });
   </script>
 </body>
 </html>
+
 
 
 
