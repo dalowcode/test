@@ -2,57 +2,70 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <title>PostMessage sniffer</title>
+  <title>Signosoft komunikace – sniffer</title>
   <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f0f0f0;
+    }
+
     iframe {
       width: 100%;
-      min-height: 800px;
-      border: 2px dashed #ccc;
+      min-height: 900px;
+      border: 2px dashed #888;
       margin-top: 20px;
+      background: white;
     }
 
     pre {
-      background: #f5f5f5;
-      padding: 10px;
+      background: #222;
+      color: #0f0;
+      padding: 15px;
+      font-size: 13px;
       max-height: 300px;
       overflow-y: auto;
-      font-size: 14px;
-      border: 1px solid #ddd;
+      white-space: pre-wrap;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
-  <h2>Test odchytu zpráv z iframe</h2>
-  <p>Všechno, co přijde z iframe (sandbox.signosoft.com), se vypíše níže:</p>
+  <h2>Odchyt zpráv z iframe (Signosoft)</h2>
+  <p>
+    Tato stránka načítá <strong>iframe ze sandbox.signosoft.com</strong> a loguje
+    všechny zprávy poslané pomocí <code>postMessage()</code>.
+  </p>
 
   <iframe id="webview"></iframe>
 
-  <h3>Zachycené zprávy:</h3>
-  <pre id="log"></pre>
+  <h3>📥 Zachycené zprávy:</h3>
+  <pre id="log">Čekám na zprávy...</pre>
 
   <script>
     const iframe = document.getElementById("webview");
     const log = document.getElementById("log");
 
-    // Načti iframe s bioid
+    // Volitelné: zkus si přidat ?bioid=... do URL
     const params = new URLSearchParams(window.location.search);
     const bioid = params.get("bioid") || "demo";
     iframe.src = `https://sandbox.signosoft.com/?bioid=${encodeURIComponent(bioid)}&server=https://sandbox.signosoft.com/api`;
 
-    // Zachyť příchozí zprávy z iframe
+    // Zachytávání postMessage zpráv
     window.addEventListener("message", (event) => {
       if (!event.origin.includes("sandbox.signosoft.com")) return;
 
       const time = new Date().toLocaleTimeString();
-      const msg = `[${time}] ${JSON.stringify(event.data, null, 2)}`;
+      const message = `[${time}] Zpráva z iframe:\n${JSON.stringify(event.data, null, 2)}\n\n`;
 
       console.log("Zpráva z iframe:", event.data);
-      log.textContent += msg + "\n\n";
+
+      // Připoj k logu
+      log.textContent = message + log.textContent;
     });
   </script>
 </body>
 </html>
-
 
 
 
