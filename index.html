@@ -99,11 +99,8 @@
         ? `https://sandbox.signosoft.com/?bioid=${encodeURIComponent(bioidValue)}&server=https://sandbox.signosoft.com/api`
         : "https://sandbox.signosoft.com/?bioid=default_value&server=https://sandbox.signosoft.com/api";
 
-      console.log("✅ Iframe zdroj nastaven na:", iframe.src);
-
       window.addEventListener("message", (event) => {
         if (event.data && event.data.event === "browsableLoaded" && isLocked) {
-          console.log("🔐 Dokument načten! Zamykám interakci.");
           iframe.style.pointerEvents = "none";
           isLocked = true;
         }
@@ -114,28 +111,30 @@
         const scrollHeight = iframeContainer.scrollHeight;
 
         if (scrollPosition >= scrollHeight - 10) {
-          console.log("✅ Uživatel doscrolloval dolů, odemykám tlačítko Podepsat.");
           signButton.disabled = false;
           signButton.style.background = "#004033";
           signButton.style.color = "#ffffff";
           signButton.style.cursor = "pointer";
           signButton.style.opacity = "1";
           alertMessage.style.display = "none";
-
           iframe.style.pointerEvents = "auto";
         }
       });
 
       signButton.addEventListener("click", () => {
-        console.log("🔏 Spouštím podpisovou relaci!");
+        // Scroll iframe do viditelné části
         window.scrollTo({
           top: iframe.offsetTop - 50,
           behavior: "smooth"
         });
 
-        iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
+        // Po krátké pauze spustí podpis
+        setTimeout(() => {
+          iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
+        }, 500);
       });
     });
   </script>
 </body>
 </html>
+
