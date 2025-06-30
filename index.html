@@ -54,14 +54,14 @@
     }
 
     footer {
-      display: none;
-      position: sticky;
-      bottom: 0;
+      width: 100%;
       height: 70px;
       background: #c4de00;
       display: flex;
       align-items: center;
       justify-content: center;
+      position: sticky;
+      bottom: 0;
       z-index: 10;
     }
 
@@ -71,10 +71,15 @@
       background: #004033;
       color: #ffffff;
       border: none;
-      cursor: pointer;
       border-radius: 10px;
-      opacity: 1;
+      cursor: not-allowed;
+      opacity: 0.5;
       transition: all 0.3s ease;
+    }
+
+    #signButton.enabled {
+      cursor: pointer;
+      opacity: 1;
     }
   </style>
 </head>
@@ -91,20 +96,16 @@
     <iframe id="webview"></iframe>
   </div>
 
-  <!-- Sentinel můžeš později přizpůsobit nebo zrušit, zde nepotřebujeme -->
-
-  <footer id="footer">
-    <button id="signButton">Podepsat</button>
+  <footer>
+    <button id="signButton" disabled>Podepsat</button>
   </footer>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const iframe = document.getElementById("webview");
-      const footer = document.getElementById("footer");
       const signButton = document.getElementById("signButton");
       const alertMessage = document.getElementById("alertMessage");
 
-      // Nastav src iframe
       const urlParams = new URLSearchParams(window.location.search);
       const bioidValue = urlParams.get("bioid");
 
@@ -112,20 +113,21 @@
         ? `https://sandbox.signosoft.com/?bioid=${encodeURIComponent(bioidValue)}&server=https://sandbox.signosoft.com/api`
         : "https://sandbox.signosoft.com/?bioid=default_value&server=https://sandbox.signosoft.com/api";
 
-      // Sleduj scroll celé stránky
+      // Scroll listener – aktivuje tlačítko na konci stránky
       window.addEventListener("scroll", () => {
         const scrollTop = window.scrollY;
         const windowHeight = window.innerHeight;
         const documentHeight = document.body.scrollHeight;
 
         if (scrollTop + windowHeight >= documentHeight - 10) {
-          footer.style.display = "flex";
-          iframe.style.pointerEvents = "auto";
+          signButton.disabled = false;
+          signButton.classList.add("enabled");
           alertMessage.style.display = "none";
+          iframe.style.pointerEvents = "auto";
         }
       });
 
-      // Odeslání zprávy pro podpis
+      // Kliknutí na tlačítko
       signButton.addEventListener("click", () => {
         iframe.scrollIntoView({ behavior: "smooth", block: "center" });
 
@@ -137,6 +139,7 @@
   </script>
 </body>
 </html>
+
 
 
 
