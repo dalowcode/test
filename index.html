@@ -13,7 +13,7 @@
 
     body, html {
       width: 100%;
-      height: 100%;
+      min-height: 100%;
       display: flex;
       flex-direction: column;
       background: #ffffff;
@@ -42,19 +42,19 @@
 
     .iframe-container {
       width: 100%;
-      height: auto;
-      max-height: calc(100vh - 160px);
-      overflow-y: auto;
+      overflow: hidden;
       position: relative;
-      display: block;
     }
 
     iframe {
       width: 100%;
-      height: 100vh;
-      min-height: 100vh;
+      height: 140vh; /* výška dostatečná pro scroll, ale ne nekonečná */
       border: none;
       pointer-events: none;
+    }
+
+    #scroll-sentinel {
+      height: 60px;
     }
 
     #signButton {
@@ -66,6 +66,7 @@
       cursor: not-allowed;
       opacity: 0.5;
       border-radius: 10px;
+      transition: all 0.3s ease;
     }
   </style>
 </head>
@@ -82,41 +83,32 @@
     <iframe id="webview"></iframe>
   </div>
 
+  <!-- Sentinel = uživatel sem musí doscrollovat -->
+  <div id="scroll-sentinel"></div>
+
   <footer>
     <button id="signButton" disabled>Podepsat</button>
   </footer>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      const iframeContainer = document.getElementById("iframeContainer");
       const iframe = document.getElementById("webview");
       const signButton = document.getElementById("signButton");
       const alertMessage = document.getElementById("alertMessage");
-      let isLocked = true;
-
       const urlParams = new URLSearchParams(window.location.search);
       const bioidValue = urlParams.get("bioid");
 
+      // Nastavíme iframe src
       iframe.src = bioidValue
         ? `https://sandbox.signosoft.com/?bioid=${encodeURIComponent(bioidValue)}&server=https://sandbox.signosoft.com/api`
         : "https://sandbox.signosoft.com/?bioid=default_value&server=https://sandbox.signosoft.com/api";
 
-      // Jakmile je dokument načten, nastav rozumnou výšku iframe
-      window.addEventListener("message", (event) => {
-        if (event.data && event.data.event === "browsableLoaded" && isLocked) {
-          iframe.style.pointerEvents = "none";
-          iframe.style.height = "200vh"; // Změň podle potřeby nebo přizpůsob dynamicky
-          isLocked = true;
-        }
-      });
+      // Detekce dosažení spodní části pomocí IntersectionObserver
+      const sentinel = document.getElementById("scroll-sentinel");
 
-      iframeContainer.addEventListener("scroll", () => {
-        const scrollTop = iframeContainer.scrollTop;
-        const clientHeight = iframeContainer.clientHeight;
-        const scrollHeight = iframeContainer.scrollHeight;
-        const scrolledRatio = scrollTop + clientHeight;
-
-        if (scrolledRatio >= scrollHeight - 10) {
+      const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          // Uživatel doscrolloval k sentinel prvku
           signButton.disabled = false;
           signButton.style.background = "#004033";
           signButton.style.color = "#ffffff";
@@ -125,11 +117,16 @@
           alertMessage.style.display = "none";
           iframe.style.pointerEvents = "auto";
         }
+      }, {
+        root: null,
+        threshold: 0.75
       });
 
+      observer.observe(sentinel);
+
+      // Při kliknutí zarovnat iframe a spustit podpis
       signButton.addEventListener("click", () => {
         iframe.scrollIntoView({ behavior: "smooth", block: "center" });
-
         setTimeout(() => {
           iframe.contentWindow.postMessage({ event: "startSigning" }, "*");
         }, 600);
@@ -138,6 +135,7 @@
   </script>
 </body>
 </html>
+
 
 
 
