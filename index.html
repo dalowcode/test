@@ -48,6 +48,12 @@
       display: block;
     }
 
+    #scrollSentinel {
+      height: 1px;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
     .confirm-section {
       width: 90%;
       margin: 20px auto;
@@ -105,6 +111,8 @@
 
   <iframe id="webview"></iframe>
 
+  <div id="scrollSentinel"></div>
+
   <div class="confirm-section" id="confirmSection">
     <label>
       <input type="checkbox" id="readConfirm" />
@@ -125,22 +133,22 @@
       const alertMessage = document.getElementById("alertMessage");
       const readConfirm = document.getElementById("readConfirm");
       const confirmSection = document.getElementById("confirmSection");
+      const sentinel = document.getElementById("scrollSentinel");
 
       const params = new URLSearchParams(window.location.search);
       const bioid = params.get("bioid") || "default_value";
       iframe.src = `https://sandbox.signosoft.com/?bioid=${encodeURIComponent(bioid)}&server=https://sandbox.signosoft.com/api`;
 
-      // Sledujeme, až iframe zmizí ze zorného pole => zobrazíme checkbox
       const observer = new IntersectionObserver((entries) => {
-        if (!entries[0].isIntersecting) {
+        if (entries[0].isIntersecting) {
           confirmSection.classList.add("visible");
         }
       }, {
         root: null,
-        threshold: 0
+        threshold: 1.0
       });
 
-      observer.observe(iframe);
+      observer.observe(sentinel);
 
       readConfirm.addEventListener("change", (e) => {
         if (e.target.checked) {
