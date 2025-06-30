@@ -42,8 +42,6 @@
 
     iframe {
       width: 100%;
-      height: auto;
-      min-height: 100vh;
       border: none;
       pointer-events: none;
       display: block;
@@ -103,15 +101,22 @@
 
       const params = new URLSearchParams(window.location.search);
       const bioid = params.get("bioid") || "default_value";
+      const height = params.get("height") || "160vh";
 
       iframe.src = `https://sandbox.signosoft.com/?bioid=${encodeURIComponent(bioid)}&server=https://sandbox.signosoft.com/api`;
+      iframe.style.height = height;
 
-      // Sleduj scroll na konec stránky
+      let hasScrolled = false;
+
       window.addEventListener("scroll", () => {
         const scrollBottom = window.scrollY + window.innerHeight;
         const fullHeight = document.body.offsetHeight;
 
-        if (scrollBottom >= fullHeight - 10) {
+        if (!hasScrolled && window.scrollY > 0) {
+          hasScrolled = true;
+        }
+
+        if (hasScrolled && scrollBottom >= fullHeight - 10) {
           signButton.disabled = false;
           signButton.classList.add("enabled");
           alertMessage.style.display = "none";
@@ -119,7 +124,6 @@
         }
       });
 
-      // Kliknutí na podepsat
       signButton.addEventListener("click", () => {
         iframe.scrollIntoView({ behavior: "smooth", block: "center" });
 
@@ -131,6 +135,7 @@
   </script>
 </body>
 </html>
+
 
 
 
